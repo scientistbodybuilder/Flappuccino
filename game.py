@@ -14,7 +14,7 @@ class Player(pygame.sprite.Sprite):
     def player_input(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w]:
-            self.gravity = -9
+            self.gravity = -7
             #self.jump_sound.play()
             if self.rect.top < 0:
                 self.rect.top = 0
@@ -28,7 +28,7 @@ class Player(pygame.sprite.Sprite):
                 self.rect.right = 800
 
     def apply_gravity(self):
-        self.gravity += 0.8
+        self.gravity += 0.5
         self.rect.top += self.gravity
 
     def game_over(self):
