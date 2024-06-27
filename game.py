@@ -234,8 +234,8 @@ game_active = False
 game_paused = False
 flappy_died = False
 powerup = False
-B = 1
-E = 1
+B = 2
+E = 2
 power_up_timer_active=False
 power_up_duration=10
 start_time=None
@@ -354,8 +354,13 @@ while True: # lets our code keep running forever epic. we break if the game ends
 
     elif game_active == False and flappy_died == True:
         screen.blit(game_over_background,(0,0))
+        if collision_count > HIGHEST_SCORE:
+            HIGHEST_SCORE = collision_count
+            with open('high_score.txt','w') as file:
+                file.write(f"{collision_count}")
+                
         displayHighScore((300,275))
-        display_score2((300,300))
+        display_score2((300,300)) #293
 
         retry_surface = font.render(f'Press R to retry',False,WHITE)
         retry_rect = retry_surface.get_rect(midbottom = (300,350))
@@ -373,6 +378,7 @@ while True: # lets our code keep running forever epic. we break if the game ends
             character.rect.midbottom = (640,360)
             character.gravity = 0
         obstacles.empty()
+
     else:
         screen.blit(game_intro_background,(0,0))
         screen.blit(Intro_suface,Intro_rect)
