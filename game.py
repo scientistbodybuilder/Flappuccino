@@ -63,22 +63,18 @@ class Bean(pygame.sprite.Sprite):
     def movement(self):
         self.rect.y += self.speed
 
-    # def rotate(self):
-    #      self.angle += self.rotation_speed
-    #      self.image = pygame.transform.rotate(self.image, self.angle)
-    #      self.rect = self.image.get_rect(midbottom = (self.x_pos,self.y_pos))
-
-    def destroy(self):
+    def relocate(self):
         if self.rect.y > 720:
-            self.kill()
+            self.rect.y = -20
+            self.rect.x = random.randint(1,1280)
 
-    def clear(self):
-        self.kill()
+    def collide(self):
+        self.rect.y = self.y_pos
 
     def update(self):
         #self.rotate()
         self.movement()
-        self.destroy()
+        self.relocate()
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self,speed):
@@ -92,17 +88,18 @@ class Enemy(pygame.sprite.Sprite):
     def movement(self):
         self.rect.y += self.speed
 
-    def destroy(self):
+    def relocate(self):
         if self.rect.y > 720:
-            self.kill()
+            self.rect.y = -20
+            self.rect.x = random.randint(1,1280)
 
-    def clear(self):
-        self.kill()
+    def collide(self):
+        self.rect.y = self.y_pos
 
     def update(self):
         #self.rotate()
         self.movement()
-        self.destroy()
+        self.relocate()
 
 class Button():
     def __init__(self, x, y, image, scale):
@@ -146,7 +143,7 @@ def display_hp(pos):
     screen.blit(hp_surface,hp_rect)
 
     pygame.draw.rect(screen, "red", (272,667,200,35))
-    pygame.draw.rect(screen, (9, 216, 39), (272,667, 200 * ratio, 35))
+    pygame.draw.rect(screen, (9, 216, 39), (272,667, 200 * health, 35))
 
 def display_powerUp(pos):
     power_up_surface = font.render("Power Up:",False,WHITE)
@@ -168,9 +165,9 @@ def elapsed_time(start_time):
 
 pygame.init()
 
-width = 1280
-height = 720
-screen = pygame.display.set_mode((width, height))   #main display surface
+WIDTH = 1280
+HEIGHT = 720
+screen = pygame.display.set_mode((WIDTH, HEIGHT))   #main display surface
 pygame.display.set_caption("Flappuccino")
 font = pygame.font.Font(None, 30)
 arial = pygame.font.SysFont("arialblack",30)
@@ -186,21 +183,21 @@ flappy = Player()
 player = pygame.sprite.GroupSingle()
 player.add(flappy)
 
-game_active_background = pygame.image.load('Assets/Backgrounds/bkg1_1280x720.png')
-game_intro_background =  pygame.image.load('Assets/Backgrounds/titlepage2_1280x720.png')
-pause_menu_packground = pygame.image.load('Assets/Backgrounds/pause_1280x720.png')
-game_over_background = pygame.image.load('Assets/Backgrounds/gameover_bkg_1280x720.png')
-quit_button_img = pygame.image.load('Assets/Buttons/Quit Button1.png')
-resume_button_img = pygame.image.load('Assets/Buttons/Resume Button1.png')
+game_active_background = pygame.image.load('Assets/Backgrounds/bkg1_1280x720.png').convert()
+game_intro_background =  pygame.image.load('Assets/Backgrounds/titlepage2_1280x720.png').convert()
+pause_menu_packground = pygame.image.load('Assets/Backgrounds/pause_1280x720.png').convert()
+game_over_background = pygame.image.load('Assets/Backgrounds/gameover_bkg_1280x720.png').convert()
+quit_button_img = pygame.image.load('Assets/Buttons/Quit Button1.png').convert()
+resume_button_img = pygame.image.load('Assets/Buttons/Resume Button1.png').convert()
 
-dashboard_surface = pygame.Surface((width,70))
+dashboard_surface = pygame.Surface((WIDTH,70))
 dashboard_surface.fill((102, 64, 26))
-
 bean_surface = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/Coffee_bean.xcf').convert_alpha(), 0.4)
 
+
+
 #Player Stats
-health = 5
-ratio = 1
+health = 1
 progress = 1
 
 #Game States
@@ -217,7 +214,6 @@ power_up_duration=10
 start_time=None
 
 #Game Over
-rotation = 0
 collision_count = 0
 collision_sound = pygame.mixer.Sound('Assets/Sound/player-select.mp3')
 collision_sound.set_volume(0.15)
@@ -231,30 +227,38 @@ Intro_rect = Intro_suface.get_rect(midbottom = (300,360))
 Controls_surface = font.render("Use 'w,a,d' to move and press ESC to pause",False,GREY)
 controls_rect = Controls_surface.get_rect(midbottom = (300,390))
 
-
+sprite_spawn = 900
 object_timer = pygame.USEREVENT +1
-pygame.time.set_timer(object_timer, 900)
+pygame.time.set_timer(object_timer, sprite_spawn)
 object_speed_timer = pygame.USEREVENT +2
 pygame.time.set_timer(object_speed_timer,60000)
 #Frame rate. we need to set a upper and lower bound for it
 clock = pygame.time.Clock()
 
-
+#GAME LOOP
 while True: # lets our code keep running forever epic. we break if the game ends
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
         if game_active:
-            if game_paused == False:
+            if not game_paused:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_w:
                          player_gravity = -15
                     if event.key == pygame.K_ESCAPE:
                         game_paused = True
                 if event.type == object_timer:
-                    addBean(B)
-                    addEnemy(E)
+                    #check whether we enough enough objects in the group already
+                    if len(obstacles.sprites()) < 15:
+                        addBean(B)
+                        addEnemy(E)
+                    elif sprite_spawn == 900:
+                        sprite_spawn = 10000
+                        pygame.time.set_timer(object_timer,sprite_spawn)
+                    else:
+                        addBean(B)
+                        addEnemy(E)
                 if event.type == object_speed_timer: #find a way to sleep creating new objects, so the old ones are off the screen before increasing timer
                     FALL_SPEED +=0.01
             else:
@@ -264,21 +268,26 @@ while True: # lets our code keep running forever epic. we break if the game ends
                     if event.key == pygame.K_q:
                         game_paused = False
                         game_active = False
-
         else:
-            if flappy_died == True:
+            if flappy_died:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    sprite_spawn = 900
+                    pygame.time.set_timer(object_timer,sprite_spawn)
                     flappy_died = False
+                    # obstacles.empty()
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                     collision_count=0
+                    sprite_spawn = 900
+                    pygame.time.set_timer(object_timer,sprite_spawn)
                     flappy_died = False
                     game_active = True
+                    # obstacles.empty()
             else:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and game_active == False:
                     player_gravity = 0
                     game_active = True
                      
-    if game_active and game_paused == False and powerup == False:
+    if game_active and not game_paused and not powerup:
         screen.blit(game_active_background,(0,0))
         player.draw(screen)
         player.update()
@@ -297,31 +306,36 @@ while True: # lets our code keep running forever epic. we break if the game ends
         display_powerUp((530,675))
         display_score2((100,675))
 
-        collisions = pygame.sprite.spritecollide(flappy,obstacles,True)
+        if progress < 0:
+            B=5
+            E=0
+            print("power up started")
+            print(f"We are drawing {B} beans per tick")
+            start_time = pygame.time.get_ticks()
+            powerup = True
+
+        collisions = pygame.sprite.spritecollide(flappy,obstacles,False)
         for obstacle in collisions:
             if type(obstacle) == Bean:
                 collision_count += 1
                 collision_sound.play()
+                obstacle.collide()
                 if progress > 0:
-                    progress-=0.1
+                    progress-=0.01
+                    print(f"current progress: {progress}")
                 
             else:  #Player hit an enemy now
+                obstacle.collide()
                 damage_sound.play()
-                health-=1
-                ratio -= 0.2
-                if health == 0:
+                health -= 0.2
+                if health <= 0:
                     game_over_sound.play()
                     time.sleep(3)
                     game_active = False
                     flappy_died = True
-        if progress == 0:
-            B=5
-            print("power up started")
-            start_time = pygame.time.get_ticks()
-            powerup = True
+    
 
-    elif game_active == True and game_paused == False and powerup == True:
-        print(B)
+    elif game_active and not game_paused and powerup:
         screen.blit(game_active_background,(0,0))
         player.draw(screen)
         player.update()
@@ -329,6 +343,7 @@ while True: # lets our code keep running forever epic. we break if the game ends
             if character.game_over():
                 flappy_died = True
                 game_active = False
+                powerup = False
 
         obstacles.draw(screen)
         obstacles.update()
@@ -340,25 +355,29 @@ while True: # lets our code keep running forever epic. we break if the game ends
         display_powerUp((530,675))
         display_score2((100,675))
 
-        collisions = pygame.sprite.spritecollide(flappy,obstacles,True)
+        collisions = pygame.sprite.spritecollide(flappy,obstacles,False)
         for obstacle in collisions:
             if type(obstacle) == Bean:
                 collision_count += 1
-                collision_sound.play()     
+                collision_sound.play()   
+                obstacle.collide()  
             else:  #Player hit an enemy now
                 damage_sound.play()
-                health-=1
-                ratio -= 0.2
+                obstacle.collide()
+                health -= 0.2
                 if health == 0:
                     game_over_sound.play()
                     time.sleep(3)
                     game_active = False
                     flappy_died = True
                     powerup = False
-        if elapsed_time() < power_up_duration:
-            progress +=0.001666
+        print(f"powerup start time: {start_time}")
+        if elapsed_time(start_time) < power_up_duration:
+            progress += 0.003
         if progress > 1:
+            progress = 1
             B=1
+            E=1
             print("power up ended")
             powerup = False
 
@@ -377,7 +396,7 @@ while True: # lets our code keep running forever epic. we break if the game ends
             game_paused = False
             game_active = False
 
-    elif game_active == False and flappy_died == True:
+    elif not game_active and flappy_died:
         screen.blit(game_over_background,(0,0))
         if collision_count > HIGHEST_SCORE:
             HIGHEST_SCORE = collision_count
@@ -395,8 +414,7 @@ while True: # lets our code keep running forever epic. we break if the game ends
 
         screen.blit(retry_surface,retry_rect)
         screen.blit(home_surface,home_rect)
-        health = 5
-        ratio = 1
+        health = 1
         progress = 1
 
         #Reset the player back to the starting position
@@ -410,11 +428,11 @@ while True: # lets our code keep running forever epic. we break if the game ends
         screen.blit(Intro_suface,Intro_rect)
         screen.blit(Controls_surface,controls_rect)
 
-        health = 5
-        ratio = 1
+        health = 1
         progress = 1
 
         #Reset the player back to the starting position
+        collision_count = 0
         for character in player:
             character.rect.midbottom = (640,360)
             character.gravity = 0
