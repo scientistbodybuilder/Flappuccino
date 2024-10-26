@@ -194,6 +194,9 @@ class Button():
         self.rect.midbottom = (x,y)
         self.clicked = False
 
+    def display(self):
+        screen.blit(self.image, (self.rect.x, self.rect.y))
+
     def draw(self):
         action = False
         pos = pygame.mouse.get_pos()
@@ -264,52 +267,63 @@ GREY = (64,64,64)
 BLACK = (0,0,0)
 
 #LOAD ASSETS
+#CHARACTERS
 flappy_image = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/flappy.xcf').convert_alpha(), 0.5)
-americano_image = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/americano.xcf').convert_alpha(), 0.65)
+flappy_char_select = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/flappy.xcf').convert_alpha(), 1.5)
+char1 = {'display':flappy_char_select,'game_image':flappy_image}
 messy_flappy_image = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/messy_flappy.xcf').convert_alpha(), 0.5)
+messy_flappy_char_select = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/messy_flappy.xcf').convert_alpha(), 1.5)
+char2 = {'display':messy_flappy_char_select,'game_image':messy_flappy_image}
+americano_image = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/americano.xcf').convert_alpha(), 0.6)
+americano_char_select = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/americano.xcf').convert_alpha(), 1.6)
+char3 = {'display':americano_char_select,'game_image':americano_image}
 
+#BACKGROUNDS
 game_active_background = pygame.image.load('Assets/Backgrounds/bkg1_1280x720.png').convert()
 game_intro_background =  pygame.image.load('Assets/Backgrounds/titlepage_1280x720.png').convert()
 pause_menu_packground = pygame.image.load('Assets/Backgrounds/pause_1280x720.png').convert()
 game_over_background = pygame.image.load('Assets/Backgrounds/single_gameover_1280x720.png').convert()
 coop_game_over_background = pygame.image.load('Assets/Backgrounds/coop_gameover_1280x720.png').convert()
+character_selection = pygame.image.load('Assets/Backgrounds/Character Selection.png').convert()
+#BUTTONS
 quit_button_img = pygame.image.load('Assets/Buttons/Quit Button1.png').convert()
+start_button_img = pygame.image.load('Assets/Buttons/start_button.xcf').convert_alpha()
+right_character_selection_button = pygame.image.load('Assets/Buttons/CS_button.xcf').convert_alpha()
+left_character_selection_button = pygame.transform.flip(right_character_selection_button,True,False)
 resume_button_img = pygame.image.load('Assets/Buttons/Resume Button1.png').convert()
 single_mode_button_img = pygame.image.load('Assets/Buttons/Single Mode.xcf').convert_alpha()
 coop_mode_button_img = pygame.image.load('Assets/Buttons/Coop Mode.xcf').convert_alpha()
 dashboard_surface = pygame.Surface((WIDTH,70))
 dashboard_surface.fill((102, 64, 26))
 bean_surface = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/Coffee_bean.xcf').convert_alpha(), 0.4)
-
-#Game Over
+#SOUNDS
 collision_sound = pygame.mixer.Sound('Assets/Sound/player-select.mp3')
 collision_sound.set_volume(0.15)
 game_over_sound = pygame.mixer.Sound('Assets/Sound/player-lose.wav')
 game_over_sound.set_volume(0.3)
 damage_sound = pygame.mixer.Sound('Assets/Sound/damage1-mixkit.wav')
 damage_sound.set_volume(0.5)
+charSelSound = pygame.mixer.Sound('Assets/Sound/blipSelect.wav')
+charSelSound.set_volume(0.3)
 
-Intro_suface = font.render(f'Press Space to Start',False,GREY)
-Intro_rect = Intro_suface.get_rect(midbottom = (300,360))
-Controls_surface = font.render("Use 'w,a,d' to move and press ESC to pause",False,GREY)
-controls_rect = Controls_surface.get_rect(midbottom = (300,390))
+Controls_surface = font.render("Use 'w,a,d' to move and press ESC in game to pause",False,GREY)
+controls_rect = Controls_surface.get_rect(midbottom = (640,600))
+Coop_Controls_surface = font.render(f"Player 1 uses 'w,a,d' and Player 2 uses arrow keys for movement",False,GREY)
+coop_controls_rect = Coop_Controls_surface.get_rect(midbottom = (640,600))
+Back_surface = font.render("Press ESC to return home",False,GREY)
+back_rect = Back_surface.get_rect(midbottom = (640,625))
 
 clock = pygame.time.Clock()
 
 def main_menu():
     while True:
         screen.blit(game_intro_background,(0,0))
-        screen.blit(Intro_suface,Intro_rect)
-        screen.blit(Controls_surface,controls_rect)
-
         single_player_button = Button(180,470,single_mode_button_img,1.3)
         two_player_button = Button(410,470,coop_mode_button_img,1.3)
         if single_player_button.draw():
-            print("clicked single player")
-            singleMode()
+            singleCharSelect()
         if two_player_button.draw():
-            print("clicked two player")
-            coopMode()
+            coopCharSelect()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -319,7 +333,110 @@ def main_menu():
         pygame.display.update()
         clock.tick(60)
 
-def retry_menu(collision_count,player,obstacles):
+def singleCharSelect():
+    chars = [char1,char2,char3]
+    len_chars = len(chars)-1
+    char_index = 0
+    while True:
+        screen.blit(character_selection,(0,0))
+        screen.blit(Controls_surface,controls_rect)
+        screen.blit(Back_surface,back_rect)
+        rect = chars[char_index]['display'].get_rect(midbottom=(640,450))
+        screen.blit(chars[char_index]['display'],rect)
+        right_arrow_button = Button(800,480,right_character_selection_button,1.5)
+        left_arrow_button = Button(480,480,left_character_selection_button,1.5)
+        if char_index == 0: # first character selected
+            right_arrow_button.display()   
+        elif char_index == len_chars: # last character selected
+            left_arrow_button.display()
+        else: # middle character
+            right_arrow_button.display()
+            left_arrow_button.display()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                main_menu()
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                pos = pygame.mouse.get_pos()
+                if right_arrow_button.rect.collidepoint(pos):
+                    char_index+=1
+                    charSelSound.play()
+                elif left_arrow_button.rect.collidepoint(pos):
+                    char_index -=1
+                    charSelSound.play()
+        start_btn = Button(640,515,start_button_img,1.5)
+        if start_btn.draw():
+            singleMode(chars[char_index]['game_image'])
+        
+        pygame.display.update()
+        clock.tick(60)
+
+def coopCharSelect():
+    chars = [char1,char2,char3]
+    len_chars = len(chars)-1
+    p1_char_index = 0
+    p2_char_index = 0
+    while True:
+        screen.blit(character_selection,(0,0))
+        screen.blit(Coop_Controls_surface,coop_controls_rect)
+        screen.blit(Back_surface,back_rect)
+        #display characters
+        p1_rect = chars[p1_char_index]['display'].get_rect(midbottom=(430,450))
+        screen.blit(chars[p1_char_index]['display'],p1_rect)
+        p2_rect = chars[p2_char_index]['display'].get_rect(midbottom=(850,450))
+        screen.blit(chars[p2_char_index]['display'],p2_rect)
+        p1_right_arrow_button = Button(575,490,right_character_selection_button,1.2)
+        p1_left_arrow_button = Button(285,490,left_character_selection_button,1.2)
+        p2_right_arrow_button = Button(1000,490,right_character_selection_button,1.2)
+        p2_left_arrow_button = Button(700,490,left_character_selection_button,1.2)
+        #player 1 select buttons
+        if p1_char_index == 0: # first character selected
+            p1_right_arrow_button.display()
+        if p1_char_index == len_chars: # last character selected
+            p1_left_arrow_button.display()
+        if p1_char_index > 0 and p1_char_index < len_chars: # middle character
+            p1_right_arrow_button.display()
+            p1_left_arrow_button.display()
+
+        #player 2 select buttons
+        if p2_char_index == 0: # first character selected
+            p2_right_arrow_button.display()
+        if p2_char_index == len_chars: # last character selected
+            p2_left_arrow_button.display()
+        if p2_char_index > 0 and p2_char_index < len_chars: # middle character
+            p2_right_arrow_button.display()
+            p2_left_arrow_button.display()
+
+        start_btn = Button(640,560,start_button_img,1.5)
+        if start_btn.draw():
+            coopMode(chars[p1_char_index]['game_image'],chars[p2_char_index]['game_image'])
+        for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    main_menu()
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    pos = pygame.mouse.get_pos()
+                    if p1_right_arrow_button.rect.collidepoint(pos):
+                        p1_char_index+=1
+                        charSelSound.play()
+                    elif p1_left_arrow_button.rect.collidepoint(pos):
+                        p1_char_index -=1
+                        charSelSound.play()
+                    elif p2_left_arrow_button.rect.collidepoint(pos):
+                        p2_char_index -=1
+                        charSelSound.play()
+                    elif p2_right_arrow_button.rect.collidepoint(pos):
+                        p2_char_index +=1
+                        charSelSound.play()
+                    
+        pygame.display.update()
+        clock.tick(60)
+
+def retry_menu(collision_count,player,obstacles,image):
     while True:
         high_score = getHighScore()
         screen.blit(game_over_background,(0,0))
@@ -352,11 +469,11 @@ def retry_menu(collision_count,player,obstacles):
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 main_menu()
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-                singleMode()
+                singleMode(image)
         pygame.display.update()
         clock.tick(60)
 
-def coop_retry_menu(p1_score,p2_score,players,p1_obstacles,p2_obstacles):
+def coop_retry_menu(p1_score,p2_score,players,p1_obstacles,p2_obstacles,p1_image,p2_image):
     while True:
         screen.blit(coop_game_over_background,(0,0))
         p1_score_surface = large_font.render(f'Player 1 Score: {p1_score}',False,WHITE)
@@ -388,11 +505,11 @@ def coop_retry_menu(p1_score,p2_score,players,p1_obstacles,p2_obstacles):
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 main_menu()
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-                coopMode()
+                coopMode(p1_image,p2_image)
         pygame.display.update()
         clock.tick(60)
 #GAME MODES
-def singleMode():
+def singleMode(image):
     #initialize parameters
     health = 1
     progress = 1
@@ -424,7 +541,7 @@ def singleMode():
     #Groups
     obstacles = pygame.sprite.Group()
 
-    flappy = Player(messy_flappy_image)
+    flappy = Player(image)
     player = pygame.sprite.GroupSingle()
     player.add(flappy)
 
@@ -463,7 +580,7 @@ def singleMode():
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                         main_menu()
                     elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-                        retry_menu(collision_count,player,obstacles)
+                        retry_menu(collision_count,player,obstacles,image)
 
         # GAME ACTIVE AND POWER UP NOT ACTIVE           
         if game_active and not game_paused and not powerup: 
@@ -590,7 +707,7 @@ def singleMode():
         # RETRY SCREEN
         elif not game_active and flappy_died:
             print("going to retry menu")
-            retry_menu(collision_count,player,obstacles)
+            retry_menu(collision_count,player,obstacles,image)
         # TO MAIN MENU
         else:
             print("going back to main menu")
@@ -598,7 +715,7 @@ def singleMode():
         pygame.display.update()
         clock.tick(60) #won't run faster than 60 frames per second
 
-def coopMode():
+def coopMode(p1_image,p2_image):
     game_active = True
     BAR_LEN = 150
     speed = 2
@@ -632,7 +749,7 @@ def coopMode():
     pygame.time.set_timer(p1_object_timer, p1_sprite_spawn)
 
     p1_obstacles = pygame.sprite.Group()
-    p1 = Player1(flappy_image)
+    p1 = Player1(p1_image)
     players.add(p1)
 
     #PLAYER 2
@@ -653,7 +770,7 @@ def coopMode():
     pygame.time.set_timer(p2_object_timer, p2_sprite_spawn)
 
     p2_obstacles = pygame.sprite.Group()
-    p2 = Player2(messy_flappy_image)
+    p2 = Player2(p2_image)
     players.add(p2)
 
     while True: # lets our code keep running forever epic. we break if the game ends
@@ -694,7 +811,7 @@ def coopMode():
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                         main_menu()
                     elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-                        coop_retry_menu(p1_collision_count,p2_collision_count,list(players),p1_obstacles,p2_obstacles)
+                        coop_retry_menu(p1_collision_count,p2_collision_count,list(players),p1_obstacles,p2_obstacles,p1_image,p2_image)
         # GAME ACTIVE AND POWER UP NOT ACTIVE           
         if game_active: 
             screen.blit(game_active_background,(0,0))
@@ -816,7 +933,7 @@ def coopMode():
         # RETRY SCREEN
         elif not game_active and (p1_died or p2_died):
             print("going to retry menu")
-            coop_retry_menu(p1_collision_count,p2_collision_count,list(players),p1_obstacles,p2_obstacles)
+            coop_retry_menu(p1_collision_count,p2_collision_count,list(players),p1_obstacles,p2_obstacles,p1_image,p2_image)
         # TO MAIN MENU
         else:
             print("going back to main menu")
@@ -824,4 +941,5 @@ def coopMode():
         pygame.display.update()
         clock.tick(60) #won't run faster than 60 frames per second
 
+# main_menu()
 main_menu()
