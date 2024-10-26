@@ -321,8 +321,10 @@ def main_menu():
         single_player_button = Button(180,470,single_mode_button_img,1.3)
         two_player_button = Button(410,470,coop_mode_button_img,1.3)
         if single_player_button.draw():
+            charSelSound.play()
             singleCharSelect()
         if two_player_button.draw():
+            charSelSound.play()
             coopCharSelect()
 
         for event in pygame.event.get():
@@ -368,6 +370,7 @@ def singleCharSelect():
                     charSelSound.play()
         start_btn = Button(640,515,start_button_img,1.5)
         if start_btn.draw():
+            charSelSound.play()
             singleMode(chars[char_index]['game_image'])
         
         pygame.display.update()
@@ -411,6 +414,7 @@ def coopCharSelect():
 
         start_btn = Button(640,560,start_button_img,1.5)
         if start_btn.draw():
+            charSelSound.play()
             coopMode(chars[p1_char_index]['game_image'],chars[p2_char_index]['game_image'])
         for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -706,11 +710,9 @@ def singleMode(image):
                 main_menu()
         # RETRY SCREEN
         elif not game_active and flappy_died:
-            print("going to retry menu")
             retry_menu(collision_count,player,obstacles,image)
         # TO MAIN MENU
         else:
-            print("going back to main menu")
             main_menu()
         pygame.display.update()
         clock.tick(60) #won't run faster than 60 frames per second
@@ -932,11 +934,9 @@ def coopMode(p1_image,p2_image):
                         obstacle.kill()
         # RETRY SCREEN
         elif not game_active and (p1_died or p2_died):
-            print("going to retry menu")
             coop_retry_menu(p1_collision_count,p2_collision_count,list(players),p1_obstacles,p2_obstacles,p1_image,p2_image)
         # TO MAIN MENU
         else:
-            print("going back to main menu")
             main_menu()
         pygame.display.update()
         clock.tick(60) #won't run faster than 60 frames per second
