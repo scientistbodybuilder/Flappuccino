@@ -135,7 +135,7 @@ class Player2(pygame.sprite.Sprite):
 class Bean(pygame.sprite.Sprite):
     def __init__(self, speed,min_x,max_x):
         super().__init__()
-        self.image = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/Coffee_bean.xcf').convert_alpha(), 0.4)
+        self.image = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/Coffee_bean.xcf').convert_alpha(), 0.3)
         self.min_x = min_x
         self.max_x = max_x
         self.x_pos = random.randint(self.min_x,self.max_x)
@@ -177,7 +177,7 @@ class Enemy(pygame.sprite.Sprite):
             self.rect.x = random.randint(self.min_x,self.max_x)
     def offscreen(self):
         if self.rect.y > 720:
-            self.relocate()
+            self.kill()
     def collide(self):
         self.kill()
 
@@ -297,14 +297,18 @@ dashboard_surface = pygame.Surface((WIDTH,70))
 dashboard_surface.fill((102, 64, 26))
 bean_surface = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/Coffee_bean.xcf').convert_alpha(), 0.4)
 #SOUNDS
-collision_sound = pygame.mixer.Sound('Assets/Sound/player-select.mp3')
+collision_sound = pygame.mixer.Sound('Assets/Sound/collide_bean.mp3')
 collision_sound.set_volume(0.15)
 game_over_sound = pygame.mixer.Sound('Assets/Sound/player-lose.wav')
 game_over_sound.set_volume(0.3)
-damage_sound = pygame.mixer.Sound('Assets/Sound/damage1-mixkit.wav')
+damage_sound = pygame.mixer.Sound('Assets/Sound/collide_sugar.wav')
 damage_sound.set_volume(0.5)
-charSelSound = pygame.mixer.Sound('Assets/Sound/blipSelect.wav')
-charSelSound.set_volume(0.3)
+char_sel_sound = pygame.mixer.Sound('Assets/Sound/blip_click.mp3')
+char_sel_sound.set_volume(0.3)
+button_sound = pygame.mixer.Sound('Assets/Sound/button.mp3')
+button_sound.set_volume(1)
+pygame.mixer.music.load('Assets/Sound/house_party_bkg_music.mp3')
+pygame.mixer.music.set_volume(0.3)
 
 Controls_surface = font.render("Use 'w,a,d' to move and press ESC in game to pause",False,GREY)
 controls_rect = Controls_surface.get_rect(midbottom = (640,600))
@@ -316,15 +320,16 @@ back_rect = Back_surface.get_rect(midbottom = (640,625))
 clock = pygame.time.Clock()
 
 def main_menu():
+    pygame.mixer.music.play(-1,0.0)
     while True:
         screen.blit(game_intro_background,(0,0))
         single_player_button = Button(180,470,single_mode_button_img,1.3)
         two_player_button = Button(410,470,coop_mode_button_img,1.3)
         if single_player_button.draw():
-            charSelSound.play()
+            button_sound.play()
             singleCharSelect()
         if two_player_button.draw():
-            charSelSound.play()
+            button_sound.play()
             coopCharSelect()
 
         for event in pygame.event.get():
@@ -336,6 +341,7 @@ def main_menu():
         clock.tick(60)
 
 def singleCharSelect():
+    pygame.mixer.music.play(-1,0.0)
     chars = [char1,char2,char3]
     len_chars = len(chars)-1
     char_index = 0
@@ -364,19 +370,20 @@ def singleCharSelect():
                 pos = pygame.mouse.get_pos()
                 if right_arrow_button.rect.collidepoint(pos):
                     char_index+=1
-                    charSelSound.play()
+                    char_sel_sound.play()
                 elif left_arrow_button.rect.collidepoint(pos):
                     char_index -=1
-                    charSelSound.play()
+                    char_sel_sound.play()
         start_btn = Button(640,515,start_button_img,1.5)
         if start_btn.draw():
-            charSelSound.play()
+            button_sound.play()
             singleMode(chars[char_index]['game_image'])
         
         pygame.display.update()
         clock.tick(60)
 
 def coopCharSelect():
+    pygame.mixer.music.play(-1,0.0)
     chars = [char1,char2,char3]
     len_chars = len(chars)-1
     p1_char_index = 0
@@ -414,7 +421,7 @@ def coopCharSelect():
 
         start_btn = Button(640,560,start_button_img,1.5)
         if start_btn.draw():
-            charSelSound.play()
+            button_sound.play()
             coopMode(chars[p1_char_index]['game_image'],chars[p2_char_index]['game_image'])
         for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -426,21 +433,22 @@ def coopCharSelect():
                     pos = pygame.mouse.get_pos()
                     if p1_right_arrow_button.rect.collidepoint(pos):
                         p1_char_index+=1
-                        charSelSound.play()
+                        char_sel_sound.play()
                     elif p1_left_arrow_button.rect.collidepoint(pos):
                         p1_char_index -=1
-                        charSelSound.play()
+                        char_sel_sound.play()
                     elif p2_left_arrow_button.rect.collidepoint(pos):
                         p2_char_index -=1
-                        charSelSound.play()
+                        char_sel_sound.play()
                     elif p2_right_arrow_button.rect.collidepoint(pos):
                         p2_char_index +=1
-                        charSelSound.play()
+                        char_sel_sound.play()
                     
         pygame.display.update()
         clock.tick(60)
 
 def retry_menu(collision_count,player,obstacles,image):
+    pygame.mixer.music.play(-1,0.0)
     while True:
         high_score = getHighScore()
         screen.blit(game_over_background,(0,0))
@@ -478,6 +486,7 @@ def retry_menu(collision_count,player,obstacles,image):
         clock.tick(60)
 
 def coop_retry_menu(p1_score,p2_score,players,p1_obstacles,p2_obstacles,p1_image,p2_image):
+    pygame.mixer.music.play(-1,0.0)
     while True:
         screen.blit(coop_game_over_background,(0,0))
         p1_score_surface = large_font.render(f'Player 1 Score: {p1_score}',False,WHITE)
@@ -514,6 +523,7 @@ def coop_retry_menu(p1_score,p2_score,players,p1_obstacles,p2_obstacles,p1_image
         clock.tick(60)
 #GAME MODES
 def singleMode(image):
+    pygame.mixer.music.play(-1,0.0)
     #initialize parameters
     health = 1
     progress = 1
@@ -561,17 +571,11 @@ def singleMode(image):
                             game_paused = True
                     if event.type == object_timer:
                         #check whether we enough enough objects in the group already
-                        if len(obstacles.sprites()) < 15:
-                            addBean(B, obstacles,speed,min_x,max_x)
-                            addEnemy(E, obstacles,speed,min_x,max_x)
-                        elif sprite_spawn == 900:
-                            sprite_spawn = 10000
-                            pygame.time.set_timer(object_timer,sprite_spawn)
-                        else:
-                            addBean(B, obstacles,speed,min_x,max_x)
-                            addEnemy(E, obstacles,speed,min_x,max_x)
+                        print(f"adding {B} beans and {E} sugars")
+                        addBean(B, obstacles,speed,min_x,max_x)
+                        addEnemy(E, obstacles,speed,min_x,max_x)
                     if event.type == object_speed_timer: #find a way to sleep creating new objects, so the old ones are off the screen before increasing timer
-                        speed +=0.01
+                        speed +=0.05
                 else:
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_ESCAPE:
@@ -622,7 +626,7 @@ def singleMode(image):
                     collision_count += 1
                     collision_sound.play()
                     if progress > 0:
-                        progress-=0.05
+                        progress-=0.02
                     if numObj(obstacles,Bean) < 7:
                         obstacle.relocate()
                     else:
@@ -635,11 +639,8 @@ def singleMode(image):
                         game_over_sound.play()
                         time.sleep(3)
                         game_active = False
-                        flappy_died = True
-                    if numObj(obstacles,Enemy) < 7:
-                        obstacle.relocate()
-                    else:
-                        obstacle.kill()
+                        flappy_died = True  
+                    obstacle.kill()
         #GAME ACTIVE AND POWER UP ACTIVE
         elif game_active and not game_paused and powerup:
             screen.blit(game_active_background,(0,0))
@@ -681,11 +682,7 @@ def singleMode(image):
                         game_active = False
                         flappy_died = True
                         powerup = False                
-                    if numObj(obstacles,Enemy) < 7:
-                        obstacle.relocate()
-                    else:
-                        obstacle.kill()
-            print(f"powerup start time: {start_time}")
+                    obstacle.kill()
             if elapsed_time(start_time) < power_up_duration:
                 progress += 0.003
             if progress > 1:
@@ -718,6 +715,7 @@ def singleMode(image):
         clock.tick(60) #won't run faster than 60 frames per second
 
 def coopMode(p1_image,p2_image):
+    pygame.mixer.music.play(-1,0.0)
     game_active = True
     BAR_LEN = 150
     speed = 2
@@ -789,25 +787,13 @@ def coopMode(p1_image,p2_image):
                     if len(p1_obstacles.sprites()) < 15:
                         addBean(p1_bean_rate, p1_obstacles,speed,p1_min_x,p1_max_x)
                         addEnemy(p1_enemy_rate, p1_obstacles,speed,p1_min_x,p1_max_x)
-                    elif p1_sprite_spawn == 900:
-                        p1_sprite_spawn = 10000
-                        pygame.time.set_timer(p1_object_timer,p1_sprite_spawn)
-                    else:
-                        addBean(p1_bean_rate, p1_obstacles,speed,p1_min_x,p1_max_x)
-                        addEnemy(p1_enemy_rate, p1_obstacles,speed,p1_min_x,p1_max_x)
                 if event.type == p2_object_timer:
                     #check whether we enough enough objects in the group already
                     if len(p2_obstacles.sprites()) < 15:
                         addBean(p2_bean_rate, p2_obstacles,speed,p2_min_x,p2_max_x)
                         addEnemy(p2_enemy_rate, p2_obstacles,speed,p2_min_x,p2_max_x)
-                    elif p2_sprite_spawn == 900:
-                        p2_sprite_spawn = 10000
-                        pygame.time.set_timer(p2_object_timer,p2_sprite_spawn)
-                    else:
-                        addBean(p2_bean_rate, p2_obstacles,speed,p2_min_x,p2_max_x)
-                        addEnemy(p2_enemy_rate, p2_obstacles,speed,p2_min_x,p2_max_x)
                 if event.type == object_speed_timer: #find a way to sleep creating new objects, so the old ones are off the screen before increasing timer
-                    speed +=0.01
+                    speed +=0.05
             else:
                 if p1_died or p2_died:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
@@ -850,13 +836,13 @@ def coopMode(p1_image,p2_image):
             display_powerUp((1041,660), p2_powerup_black, p2_powerup_brown,small_font)
             display_score2((700,675), p2_collision_count)
 
-            if p1_progress < 0:
+            if p1_progress < 0 and not p1_powerup:
                 p1_bean_rate=5
                 p1_enemy_rate=0
                 print("p1 power up started")
                 p1_start_time = pygame.time.get_ticks()
                 p1_powerup = True
-            if p2_progress < 0:
+            if p2_progress < 0 and not p2_powerup:
                 p2_bean_rate=5
                 p2_enemy_rate=0
                 print("p2 power up started")
@@ -875,7 +861,7 @@ def coopMode(p1_image,p2_image):
                     else:
                         obstacle.kill()
                     if not p1_powerup:
-                        p1_progress-=0.05
+                        p1_progress-=0.02
                     if p1_powerup:
                         if elapsed_time(p1_start_time) < power_up_duration:
                             p1_progress += 0.003
@@ -893,10 +879,7 @@ def coopMode(p1_image,p2_image):
                         time.sleep(3)
                         game_active = False
                         p1_died = True
-                    if numObj(p1_obstacles,Enemy) < 7:
-                        obstacle.relocate()
-                    else:
-                        obstacle.kill()
+                    obstacle.kill()
 
             p2_collisions = pygame.sprite.spritecollide(p2,p2_obstacles,False)
             for obstacle in p2_collisions:
@@ -910,7 +893,7 @@ def coopMode(p1_image,p2_image):
                     else:
                         obstacle.kill()
                     if not p2_powerup:
-                        p2_progress-=0.05
+                        p2_progress-=0.02
                     if p2_powerup:
                         if elapsed_time(p2_start_time) < power_up_duration:
                             p2_progress += 0.003
@@ -928,10 +911,7 @@ def coopMode(p1_image,p2_image):
                         time.sleep(3)
                         game_active = False
                         p2_died = True
-                    if numObj(p2_obstacles,Enemy) < 7:
-                        obstacle.relocate()
-                    else:
-                        obstacle.kill()
+                    obstacle.kill()
         # RETRY SCREEN
         elif not game_active and (p1_died or p2_died):
             coop_retry_menu(p1_collision_count,p2_collision_count,list(players),p1_obstacles,p2_obstacles,p1_image,p2_image)
