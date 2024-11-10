@@ -17,11 +17,12 @@ def getHighScore():
         return 0
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self,image):
+    def __init__(self,image,powerup):
         super().__init__()
         self.image = image
         self.rect = self.image.get_rect(midbottom = (640,360))
         self.gravity = 0
+        self.powerup = powerup
         # self.jump_sound = pygame.mixer.Sound('Assets/Sound/jump2.wav')
         # self.jump_sound.set_volume(0.5)
 
@@ -54,12 +55,13 @@ class Player(pygame.sprite.Sprite):
         self.apply_gravity()
 
 class Player1(pygame.sprite.Sprite):
-    def __init__(self,image):
+    def __init__(self,image,powerup):
         super().__init__()
         self.image = image
         self.rect = self.image.get_rect(midbottom = (320,360))
         self.gravity = 0
         self.player = "P1"
+        self.powerup = powerup
         # self.jump_sound = pygame.mixer.Sound('Assets/Sound/jump2.wav')
         # self.jump_sound.set_volume(0.5)
 
@@ -97,12 +99,13 @@ class Player1(pygame.sprite.Sprite):
         self.apply_gravity()
 
 class Player2(pygame.sprite.Sprite):
-    def __init__(self,image):
+    def __init__(self,image,powerup):
         super().__init__()
         self.image = image
         self.rect = self.image.get_rect(midbottom = (960,360))
         self.gravity = 0
         self.player = "P2"
+        self.powerup = powerup
         # self.jump_sound = pygame.mixer.Sound('Assets/Sound/jump2.wav')
         # self.jump_sound.set_volume(0.5)
 
@@ -283,13 +286,14 @@ BLACK = (0,0,0)
 #CHARACTERS
 flappy_image = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/flappy.xcf').convert_alpha(), 0.5)
 flappy_char_select = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/flappy.xcf').convert_alpha(), 1.5)
-char1 = {'display':flappy_char_select,'game_image':flappy_image}
+char1 = {'display':flappy_char_select,'game_image':flappy_image,'powerup':1}
 messy_flappy_image = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/messy_flappy.xcf').convert_alpha(), 0.5)
 messy_flappy_char_select = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/messy_flappy.xcf').convert_alpha(), 1.5)
-char2 = {'display':messy_flappy_char_select,'game_image':messy_flappy_image}
+char2 = {'display':messy_flappy_char_select,'game_image':messy_flappy_image,'powerup':2}
 americano_image = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/americano.xcf').convert_alpha(), 0.6)
 americano_char_select = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/americano.xcf').convert_alpha(), 1.6)
-char3 = {'display':americano_char_select,'game_image':americano_image}
+char3 = {'display':americano_char_select,'game_image':americano_image,'powerup':3}
+chars = [char1,char2,char3]
 
 #BACKGROUNDS
 game_active_background = pygame.image.load('Assets/Backgrounds/bkg1_1280x720.png').convert()
@@ -355,7 +359,7 @@ def main_menu():
 
 def singleCharSelect():
     pygame.mixer.music.play(-1,0.0)
-    chars = [char1,char2,char3]
+    global chars
     len_chars = len(chars)-1
     char_index = 0
     while True:
@@ -390,14 +394,14 @@ def singleCharSelect():
         start_btn = Button(640,515,start_button_img,1.5)
         if start_btn.draw():
             button_sound.play()
-            singleMode(chars[char_index]['game_image'])
+            singleMode(chars[char_index]['game_image'],chars[char_index]['powerup'])
         
         pygame.display.update()
         clock.tick(60)
 
 def coopCharSelect():
     pygame.mixer.music.play(-1,0.0)
-    chars = [char1,char2,char3]
+    global chars
     len_chars = len(chars)-1
     p1_char_index = 0
     p2_char_index = 0
@@ -435,7 +439,7 @@ def coopCharSelect():
         start_btn = Button(640,560,start_button_img,1.5)
         if start_btn.draw():
             button_sound.play()
-            coopMode(chars[p1_char_index]['game_image'],chars[p2_char_index]['game_image'])
+            coopMode(chars[p1_char_index]['game_image'],chars[p2_char_index]['game_image'],chars[p1_char_index]['powerup'],chars[p2_char_index]['powerup'])
         for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -535,7 +539,7 @@ def coop_retry_menu(p1_score,p2_score,players,p1_obstacles,p2_obstacles,p1_image
         pygame.display.update()
         clock.tick(60)
 #GAME MODES
-def singleMode(image):
+def singleMode(image,powerup_type):
     pygame.mixer.music.play(-1,0.0)
     #initialize parameters
     health = 1
@@ -543,6 +547,7 @@ def singleMode(image):
     collision_count = 0
     min_x = 1
     max_x = 1280
+    speed_increase_unit = 0.05 
 
     hp_red = pygame.Rect(272,667,200,35)
     powerup_black = pygame.Rect(585,667,200,35)
@@ -563,12 +568,12 @@ def singleMode(image):
     object_timer = pygame.USEREVENT +1
     pygame.time.set_timer(object_timer, sprite_spawn)
     object_speed_timer = pygame.USEREVENT +2
-    pygame.time.set_timer(object_speed_timer,15000)
+    pygame.time.set_timer(object_speed_timer,15000) 
 
     #Groups
     obstacles = pygame.sprite.Group()
 
-    flappy = Player(image)
+    flappy = Player(image,powerup_type)
     player = pygame.sprite.GroupSingle()
     player.add(flappy)
 
@@ -587,7 +592,7 @@ def singleMode(image):
                         addBean(B,"P1",obstacles,min_x,max_x)
                         addEnemy(E,"P1",obstacles,min_x,max_x)
                     if event.type == object_speed_timer: #find a way to sleep creating new objects, so the old ones are off the screen before increasing timer
-                        p1_speed += 0.05
+                        p1_speed += speed_increase_unit
                         print(f"increase speed to {p1_speed}")
                 else:
                     if event.type == pygame.KEYDOWN:
@@ -626,8 +631,13 @@ def singleMode(image):
             display_score2((100,675), collision_count)
 
             if progress < 0:
-                B=2
-                E=0
+                if flappy.powerup == 1:
+                    B=2
+                    E=0
+                elif flappy.powerup == 2:
+                    prev_speed = p1_speed
+                    p1_speed = 1
+                    speed_increase_unit = 0
                 print("power up started")
                 start_time = pygame.time.get_ticks()
                 powerup = True
@@ -699,8 +709,13 @@ def singleMode(image):
                 progress += 0.003
             if progress > 1:
                 progress = 1
-                B=1
-                E=1
+                if flappy.powerup == 1:
+                    B=1
+                    E=1
+                elif flappy.powerup == 2:
+                    p1_speed = prev_speed
+                    speed_increase_unit = 0.05
+                
                 print("power up ended")
                 powerup = False
         # PAUSED
@@ -728,12 +743,14 @@ def singleMode(image):
         pygame.display.update()
         clock.tick(60) #won't run faster than 60 frames per second
 
-def coopMode(p1_image,p2_image):
+def coopMode(p1_image,p2_image,p1_power_up_type,p2_power_up_type):
     pygame.mixer.music.play(-1,0.0)
     game_active = True
     BAR_LEN = 150
     global p1_speed
     global p2_speed
+    p1_speed_increase_unit = 0.05
+    p2_speed_increase_unit = 0.05
     p1_min_x = 1
     p1_max_x = 630
     p2_min_x = 650
@@ -766,7 +783,7 @@ def coopMode(p1_image,p2_image):
     pygame.time.set_timer(p1_object_timer, p1_sprite_spawn)
 
     p1_obstacles = pygame.sprite.Group()
-    p1 = Player1(p1_image)
+    p1 = Player1(p1_image,p1_power_up_type)
     players.add(p1)
 
     #PLAYER 2
@@ -787,7 +804,7 @@ def coopMode(p1_image,p2_image):
     pygame.time.set_timer(p2_object_timer, p2_sprite_spawn)
 
     p2_obstacles = pygame.sprite.Group()
-    p2 = Player2(p2_image)
+    p2 = Player2(p2_image,p2_power_up_type)
     players.add(p2)
 
     while True: # lets our code keep running forever epic. we break if the game ends
@@ -810,9 +827,9 @@ def coopMode(p1_image,p2_image):
                         addBean(p2_bean_rate,"P2",p2_obstacles,p2_min_x,p2_max_x)
                         addEnemy(p2_enemy_rate,"P2",p2_obstacles,p2_min_x,p2_max_x)
                 if event.type == p1_object_speed_timer: #find a way to sleep creating new objects, so the old ones are off the screen before increasing timer
-                    p1_speed += 0.05
+                    p1_speed += p1_speed_increase_unit
                 if event.type == p2_object_speed_timer: #find a way to sleep creating new objects, so the old ones are off the screen before increasing timer
-                    p2_speed += 0.05
+                    p2_speed += p2_speed_increase_unit
             else:
                 if p1_died or p2_died:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
@@ -856,14 +873,24 @@ def coopMode(p1_image,p2_image):
             display_score2((700,675), p2_collision_count)
 
             if p1_progress < 0 and not p1_powerup:
-                p1_bean_rate=2
-                p1_enemy_rate=0
+                if p1.powerup == 1:
+                    p1_bean_rate=2
+                    p1_enemy_rate=0
+                elif p1.powerup == 2:
+                    p1_prev_speed = p1_speed
+                    p1_speed = 1
+                    p1_speed_increase_unit = 0
                 print("p1 power up started")
                 p1_start_time = pygame.time.get_ticks()
                 p1_powerup = True
             if p2_progress < 0 and not p2_powerup:
-                p2_bean_rate=2
-                p2_enemy_rate=0
+                if p2.powerup == 1:
+                    p2_bean_rate=2
+                    p2_enemy_rate=0
+                elif p2.powerup == 2:
+                    p2_prev_speed = p1_speed
+                    p2_speed = 1
+                    p2_speed_increase_unit = 0
                 print("p2 power up started")
                 p2_start_time = pygame.time.get_ticks()
                 p2_powerup = True
@@ -872,8 +899,12 @@ def coopMode(p1_image,p2_image):
                     p1_progress += 0.003
                     if p1_progress > 1:
                         p1_progress = 1
-                        p1_bean_rate=1
-                        p1_enemy_rate=1
+                        if p1.powerup == 1:     
+                            p1_bean_rate=1
+                            p1_enemy_rate=1
+                        elif p1.powerup == 2:
+                            p1_speed = p1_prev_speed
+                            p1_speed_increase_unit = 0.05
                         print("p1 power up ended")
                         p1_powerup = False 
             if p2_powerup:
@@ -881,8 +912,12 @@ def coopMode(p1_image,p2_image):
                     p2_progress += 0.003
                     if p2_progress > 1:
                         p2_progress = 1
-                        p2_bean_rate=1
-                        p2_enemy_rate=1
+                        if p2.powerup == 1:     
+                            p2_bean_rate=1
+                            p2_enemy_rate=1
+                        elif p2.powerup == 2:
+                            p2_speed = p2_prev_speed
+                            p2_speed_increase_unit = 0.05
                         print("p2 power up ended")
                         p2_powerup = False  
 
