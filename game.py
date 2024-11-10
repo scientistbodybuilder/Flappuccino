@@ -548,6 +548,7 @@ def singleMode(image,powerup_type):
     min_x = 1
     max_x = 1280
     speed_increase_unit = 0.05 
+    dmg_immune = False
 
     hp_red = pygame.Rect(272,667,200,35)
     powerup_black = pygame.Rect(585,667,200,35)
@@ -638,6 +639,8 @@ def singleMode(image,powerup_type):
                     prev_speed = p1_speed
                     p1_speed = 1
                     speed_increase_unit = 0
+                elif flappy.powerup == 3:
+                    dmg_immune = True
                 print("power up started")
                 start_time = pygame.time.get_ticks()
                 powerup = True
@@ -696,14 +699,15 @@ def singleMode(image,powerup_type):
                     else:
                         obstacle.kill()
                 else:  #Player hit an enemy now
-                    damage_sound.play()
-                    health -= 0.2
-                    if health < 0.1:
-                        game_over_sound.play()
-                        time.sleep(3)
-                        game_active = False
-                        flappy_died = True
-                        powerup = False                
+                    if not dmg_immune:
+                        damage_sound.play()
+                        health -= 0.2
+                        if health < 0.1:
+                            game_over_sound.play()
+                            time.sleep(3)
+                            game_active = False
+                            flappy_died = True
+                            powerup = False                
                     obstacle.kill()
             if elapsed_time(start_time) < power_up_duration:
                 progress += 0.003
@@ -715,6 +719,8 @@ def singleMode(image,powerup_type):
                 elif flappy.powerup == 2:
                     p1_speed = prev_speed
                     speed_increase_unit = 0.05
+                elif flappy.powerup == 3:
+                    dmg_immune = False
                 
                 print("power up ended")
                 powerup = False
@@ -745,6 +751,7 @@ def singleMode(image,powerup_type):
 
 def coopMode(p1_image,p2_image,p1_power_up_type,p2_power_up_type):
     pygame.mixer.music.play(-1,0.0)
+    #parameters
     game_active = True
     BAR_LEN = 150
     global p1_speed
@@ -755,6 +762,9 @@ def coopMode(p1_image,p2_image,p1_power_up_type,p2_power_up_type):
     p1_max_x = 630
     p2_min_x = 650
     p2_max_x = 1280
+
+    p1_dmg_immune = False
+    p2_dmg_immune = False
 
     # power_up_time=False
     power_up_duration=10
@@ -880,6 +890,8 @@ def coopMode(p1_image,p2_image,p1_power_up_type,p2_power_up_type):
                     p1_prev_speed = p1_speed
                     p1_speed = 1
                     p1_speed_increase_unit = 0
+                elif p1.powerup == 3:
+                    p1_dmg_immune = True
                 print("p1 power up started")
                 p1_start_time = pygame.time.get_ticks()
                 p1_powerup = True
@@ -891,6 +903,8 @@ def coopMode(p1_image,p2_image,p1_power_up_type,p2_power_up_type):
                     p2_prev_speed = p1_speed
                     p2_speed = 1
                     p2_speed_increase_unit = 0
+                elif p2.powerup == 3:
+                    p2_dmg_immune = True
                 print("p2 power up started")
                 p2_start_time = pygame.time.get_ticks()
                 p2_powerup = True
@@ -905,6 +919,8 @@ def coopMode(p1_image,p2_image,p1_power_up_type,p2_power_up_type):
                         elif p1.powerup == 2:
                             p1_speed = p1_prev_speed
                             p1_speed_increase_unit = 0.05
+                        elif p1.powerup == 3:
+                            p1_dmg_immune = False
                         print("p1 power up ended")
                         p1_powerup = False 
             if p2_powerup:
@@ -918,6 +934,8 @@ def coopMode(p1_image,p2_image,p1_power_up_type,p2_power_up_type):
                         elif p2.powerup == 2:
                             p2_speed = p2_prev_speed
                             p2_speed_increase_unit = 0.05
+                        elif p2.powerup == 3:
+                            p2_dmg_immune = False
                         print("p2 power up ended")
                         p2_powerup = False  
 
@@ -935,13 +953,14 @@ def coopMode(p1_image,p2_image,p1_power_up_type,p2_power_up_type):
                     if not p1_powerup:
                         p1_progress-=0.02            
                 else:  #Player hit an enemy now
-                    damage_sound.play()
-                    p1_health -= 0.2
-                    if p1_health < 0.1:
-                        game_over_sound.play()
-                        time.sleep(3)
-                        game_active = False
-                        p1_died = True
+                    if not p1_dmg_immune:
+                        damage_sound.play()
+                        p1_health -= 0.2
+                        if p1_health < 0.1:
+                            game_over_sound.play()
+                            time.sleep(3)
+                            game_active = False
+                            p1_died = True
                     obstacle.kill()
 
             p2_collisions = pygame.sprite.spritecollide(p2,p2_obstacles,False)
@@ -958,13 +977,14 @@ def coopMode(p1_image,p2_image,p1_power_up_type,p2_power_up_type):
                     if not p2_powerup:
                         p2_progress-=0.02              
                 else:  #Player hit an enemy now
-                    damage_sound.play()
-                    p2_health -= 0.2
-                    if p2_health < 0.1:
-                        game_over_sound.play()
-                        time.sleep(3)
-                        game_active = False
-                        p2_died = True
+                    if not p2_dmg_immune:
+                        damage_sound.play()
+                        p2_health -= 0.2
+                        if p2_health < 0.1:
+                            game_over_sound.play()
+                            time.sleep(3)
+                            game_active = False
+                            p2_died = True
                     obstacle.kill()
         # RETRY SCREEN
         elif not game_active and (p1_died or p2_died):
