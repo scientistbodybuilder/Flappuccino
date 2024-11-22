@@ -464,7 +464,7 @@ def coopCharSelect():
         pygame.display.update()
         clock.tick(60)
 
-def retry_menu(collision_count,player,obstacles,image,powerup_type):
+def retry_menu(collision_count,player,obstacles,image):
     pygame.mixer.music.play(-1,0.0)
     while True:
         high_score = getHighScore()
@@ -498,11 +498,11 @@ def retry_menu(collision_count,player,obstacles,image,powerup_type):
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 main_menu()
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-                singleMode(image,powerup_type)
+                singleMode(image)
         pygame.display.update()
         clock.tick(60)
 
-def coop_retry_menu(p1_score,p2_score,players,p1_obstacles,p2_obstacles,p1_image,p2_image,p1_power_up_type,p2_power_up_type):
+def coop_retry_menu(p1_score,p2_score,players,p1_obstacles,p2_obstacles,p1_image,p2_image):
     pygame.mixer.music.play(-1,0.0)
     while True:
         screen.blit(coop_game_over_background,(0,0))
@@ -535,7 +535,7 @@ def coop_retry_menu(p1_score,p2_score,players,p1_obstacles,p2_obstacles,p1_image
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 main_menu()
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-                coopMode(p1_image,p2_image,p1_power_up_type,p2_power_up_type)
+                coopMode(p1_image,p2_image)
         pygame.display.update()
         clock.tick(60)
 #GAME MODES
@@ -741,7 +741,7 @@ def singleMode(image,powerup_type):
         # RETRY SCREEN
         elif not game_active and flappy_died:
             p1_speed = 2 # reset the speed
-            retry_menu(collision_count,player,obstacles,image,powerup_type)
+            retry_menu(collision_count,player,obstacles,image)
         # TO MAIN MENU
         else:
             p1_speed = 2 # reset the speed
@@ -990,7 +990,7 @@ def coopMode(p1_image,p2_image,p1_power_up_type,p2_power_up_type):
         elif not game_active and (p1_died or p2_died):
             p1_speed = 2
             p2_speed = 2
-            coop_retry_menu(p1_collision_count,p2_collision_count,list(players),p1_obstacles,p2_obstacles,p1_image,p2_image,p1_power_up_type,p2_power_up_type)
+            coop_retry_menu(p1_collision_count,p2_collision_count,list(players),p1_obstacles,p2_obstacles,p1_image,p2_image)
         # TO MAIN MENU
         else:
             p1_speed = 2
