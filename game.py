@@ -478,10 +478,10 @@ def coopCharSelect():
                     elif p1_left_arrow_button.rect.collidepoint(pos) and p1_left_arrow_visible:
                         p1_char_index -=1
                         char_sel_sound.play()
-                    elif p2_left_arrow_button.rect.collidepoint(pos) and p2_right_arrow_visible:
+                    elif p2_left_arrow_button.rect.collidepoint(pos) and p2_left_arrow_visible:
                         p2_char_index -=1
                         char_sel_sound.play()
-                    elif p2_right_arrow_button.rect.collidepoint(pos) and p2_left_arrow_visible:
+                    elif p2_right_arrow_button.rect.collidepoint(pos) and p2_right_arrow_visible:
                         p2_char_index +=1
                         char_sel_sound.play()
                     
