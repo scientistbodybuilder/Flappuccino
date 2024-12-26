@@ -362,6 +362,8 @@ def singleCharSelect():
     global chars
     len_chars = len(chars)-1
     char_index = 0
+    right_arrow_visible=True
+    left_arrow_visible=False
     while True:
         screen.blit(character_selection,(0,0))
         screen.blit(Controls_surface,controls_rect)
@@ -371,12 +373,18 @@ def singleCharSelect():
         right_arrow_button = Button(800,480,right_character_selection_button,1.5)
         left_arrow_button = Button(480,480,left_character_selection_button,1.5)
         if char_index == 0: # first character selected
-            right_arrow_button.display()   
+            right_arrow_button.display()
+            right_arrow_visible=True
+            left_arrow_visible=False   
         elif char_index == len_chars: # last character selected
             left_arrow_button.display()
+            right_arrow_visible=False
+            left_arrow_visible=True
         else: # middle character
             right_arrow_button.display()
             left_arrow_button.display()
+            right_arrow_visible=True
+            left_arrow_visible=True
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -385,10 +393,10 @@ def singleCharSelect():
                 main_menu()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 pos = pygame.mouse.get_pos()
-                if right_arrow_button.rect.collidepoint(pos):
+                if right_arrow_button.rect.collidepoint(pos) and right_arrow_visible:
                     char_index+=1
                     char_sel_sound.play()
-                elif left_arrow_button.rect.collidepoint(pos):
+                elif left_arrow_button.rect.collidepoint(pos) and left_arrow_visible:
                     char_index -=1
                     char_sel_sound.play()
         start_btn = Button(640,515,start_button_img,1.5)
@@ -405,6 +413,10 @@ def coopCharSelect():
     len_chars = len(chars)-1
     p1_char_index = 0
     p2_char_index = 0
+    p1_right_arrow_visible=True
+    p1_left_arrow_visible=False
+    p2_right_arrow_visible=True
+    p2_left_arrow_visible=False
     while True:
         screen.blit(character_selection,(0,0))
         screen.blit(Coop_Controls_surface,coop_controls_rect)
@@ -421,20 +433,32 @@ def coopCharSelect():
         #player 1 select buttons
         if p1_char_index == 0: # first character selected
             p1_right_arrow_button.display()
+            p1_right_arrow_visible=True
+            p1_left_arrow_visible=False
         if p1_char_index == len_chars: # last character selected
             p1_left_arrow_button.display()
+            p1_right_arrow_visible=False
+            p1_left_arrow_visible=True
         if p1_char_index > 0 and p1_char_index < len_chars: # middle character
             p1_right_arrow_button.display()
             p1_left_arrow_button.display()
+            p1_right_arrow_visible=True
+            p1_left_arrow_visible=True
 
         #player 2 select buttons
         if p2_char_index == 0: # first character selected
             p2_right_arrow_button.display()
+            p2_right_arrow_visible=True
+            p2_left_arrow_visible=False
         if p2_char_index == len_chars: # last character selected
             p2_left_arrow_button.display()
+            p2_right_arrow_visible=False
+            p2_left_arrow_visible=True
         if p2_char_index > 0 and p2_char_index < len_chars: # middle character
             p2_right_arrow_button.display()
             p2_left_arrow_button.display()
+            p2_right_arrow_visible=True
+            p2_left_arrow_visible=True
 
         start_btn = Button(640,560,start_button_img,1.5)
         if start_btn.draw():
@@ -448,16 +472,16 @@ def coopCharSelect():
                     main_menu()
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     pos = pygame.mouse.get_pos()
-                    if p1_right_arrow_button.rect.collidepoint(pos):
+                    if p1_right_arrow_button.rect.collidepoint(pos) and p1_right_arrow_visible:
                         p1_char_index+=1
                         char_sel_sound.play()
-                    elif p1_left_arrow_button.rect.collidepoint(pos):
+                    elif p1_left_arrow_button.rect.collidepoint(pos) and p1_left_arrow_visible:
                         p1_char_index -=1
                         char_sel_sound.play()
-                    elif p2_left_arrow_button.rect.collidepoint(pos):
+                    elif p2_left_arrow_button.rect.collidepoint(pos) and p2_right_arrow_visible:
                         p2_char_index -=1
                         char_sel_sound.play()
-                    elif p2_right_arrow_button.rect.collidepoint(pos):
+                    elif p2_right_arrow_button.rect.collidepoint(pos) and p2_left_arrow_visible:
                         p2_char_index +=1
                         char_sel_sound.play()
                     
