@@ -1,7 +1,10 @@
 import pygame
-from sys import exit
-import random
-import time
+import sys, time, os, random
+
+def resource_path(path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, path)
+    return os.path.join(os.path.abspath("."), path)
 
 #Global Variables
 RECT = pygame.Rect(637,0,6,650)
@@ -11,7 +14,7 @@ p1_speed = 2
 p2_speed = 2
 def getHighScore():
     try:
-        with open('high_score.txt','r') as file:
+        with open(high_score_path(), 'r') as file:
             return int(file.read())
     except FileNotFoundError:
         return 0
@@ -145,7 +148,7 @@ class Player2(pygame.sprite.Sprite):
 class Bean(pygame.sprite.Sprite):
     def __init__(self,player,min_x,max_x):
         super().__init__()
-        self.image = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/Coffee_bean.xcf').convert_alpha(), 0.3)
+        self.image = pygame.transform.scale_by(pygame.image.load(resource_path('Assets/Sprites/Player_Sprite/Coffee_bean.xcf')).convert_alpha(), 0.3)
         self.min_x = min_x
         self.max_x = max_x
         self.x_pos = random.randint(self.min_x,self.max_x)
@@ -179,7 +182,7 @@ class Enemy(pygame.sprite.Sprite):
         self.x_pos = random.randint(self.min_x,self.max_x)
         self.y_pos = -10
         self.player = player
-        self.image = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/Sugar1.xcf').convert_alpha(), 0.3)
+        self.image = pygame.transform.scale_by(pygame.image.load(resource_path('Assets/Sprites/Player_Sprite/Sugar1.xcf')).convert_alpha(), 0.3)
         self.rect = self.image.get_rect(midbottom = (self.x_pos,self.y_pos))
 
     def movement(self):
@@ -227,6 +230,12 @@ class Button():
         screen.blit(self.image, (self.rect.x, self.rect.y))
 
         return action
+
+def high_score_path():
+    if hasattr(sys, '_MEIPASS'):
+        # Write next to the exe when bundled
+        return os.path.join(os.path.dirname(sys.executable), 'high_score.txt')
+    return 'high_score.txt'
 
 def display_score2(pos,collision_count): #UPDATED
     score = collision_count
@@ -284,51 +293,52 @@ BLACK = (0,0,0)
 
 #LOAD ASSETS
 #CHARACTERS
-flappy_image = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/flappy.xcf').convert_alpha(), 0.5)
-flappy_char_select = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/flappy.xcf').convert_alpha(), 1.5)
-char1 = {'display':flappy_char_select,'game_image':flappy_image,'powerup':1}
-messy_flappy_image = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/messy_flappy.xcf').convert_alpha(), 0.5)
-messy_flappy_char_select = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/messy_flappy.xcf').convert_alpha(), 1.5)
-char2 = {'display':messy_flappy_char_select,'game_image':messy_flappy_image,'powerup':2}
-americano_image = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/americano.xcf').convert_alpha(), 0.6)
-americano_char_select = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/americano.xcf').convert_alpha(), 1.6)
-char3 = {'display':americano_char_select,'game_image':americano_image,'powerup':3}
+flappy_image = pygame.transform.scale_by(pygame.image.load(resource_path('Assets/Sprites/Player_Sprite/flappy.xcf')).convert_alpha(), 0.5)
+flappy_char_select = pygame.transform.scale_by(pygame.image.load(resource_path('Assets/Sprites/Player_Sprite/flappy.xcf')).convert_alpha(), 1.5)
+char1 = {'display':flappy_char_select,'game_image':flappy_image,'powerup':1,'name':'Flappy','powerup_name':'2x Coffee Beans'}
+messy_flappy_image = pygame.transform.scale_by(pygame.image.load(resource_path('Assets/Sprites/Player_Sprite/messy_flappy.xcf')).convert_alpha(), 0.5)
+messy_flappy_char_select = pygame.transform.scale_by(pygame.image.load(resource_path('Assets/Sprites/Player_Sprite/messy_flappy.xcf')).convert_alpha(), 1.5)
+char2 = {'display':messy_flappy_char_select,'game_image':messy_flappy_image,'powerup':2,'name':'Messy Flappy','powerup_name':'Time Slow'}
+americano_image = pygame.transform.scale_by(pygame.image.load(resource_path('Assets/Sprites/Player_Sprite/americano.xcf')).convert_alpha(), 0.6)
+americano_char_select = pygame.transform.scale_by(pygame.image.load(resource_path('Assets/Sprites/Player_Sprite/americano.xcf')).convert_alpha(), 1.6)
+char3 = {'display':americano_char_select,'game_image':americano_image,'powerup':3,'name':'Americano','powerup_name':'Invincibility'}
 chars = [char1,char2,char3]
 
 #BACKGROUNDS
-game_active_background = pygame.image.load('Assets/Backgrounds/bkg1_1280x720.png').convert()
-game_intro_background =  pygame.image.load('Assets/Backgrounds/titlepage_1280x720.png').convert()
-pause_menu_packground = pygame.image.load('Assets/Backgrounds/pause_1280x720.png').convert()
-game_over_background = pygame.image.load('Assets/Backgrounds/single_gameover_1280x720.png').convert()
-coop_game_over_background = pygame.image.load('Assets/Backgrounds/coop_gameover_1280x720.png').convert()
-character_selection = pygame.image.load('Assets/Backgrounds/Character Selection.png').convert()
+game_active_background = pygame.image.load(resource_path('Assets/Backgrounds/bkg1_1280x720.png')).convert()
+game_intro_background =  pygame.image.load(resource_path('Assets/Backgrounds/titlepage_1280x720.png')).convert()
+pause_menu_packground = pygame.image.load(resource_path('Assets/Backgrounds/pause_1280x720.png')).convert()
+game_over_background = pygame.image.load(resource_path('Assets/Backgrounds/single_gameover_1280x720.png')).convert()
+coop_game_over_background = pygame.image.load(resource_path('Assets/Backgrounds/coop_gameover_1280x720.png')).convert()
+character_selection = pygame.image.load(resource_path('Assets/Backgrounds/Character Selection.png')).convert()
 #BUTTONS
-quit_button_img = pygame.image.load('Assets/Buttons/Quit Button1.png').convert()
-start_button_img = pygame.image.load('Assets/Buttons/start_button.xcf').convert_alpha()
-right_character_selection_button = pygame.image.load('Assets/Buttons/CS_button.xcf').convert_alpha()
+quit_button_img = pygame.image.load(resource_path('Assets/Buttons/Quit Button1.png')).convert()
+start_button_img = pygame.image.load(resource_path('Assets/Buttons/start_button.xcf')).convert_alpha()
+right_character_selection_button = pygame.image.load(resource_path('Assets/Buttons/CS_button.xcf')).convert_alpha()
 left_character_selection_button = pygame.transform.flip(right_character_selection_button,True,False)
-resume_button_img = pygame.image.load('Assets/Buttons/Resume Button1.png').convert()
-single_mode_button_img = pygame.image.load('Assets/Buttons/Single Mode.xcf').convert_alpha()
-coop_mode_button_img = pygame.image.load('Assets/Buttons/Coop Mode.xcf').convert_alpha()
+resume_button_img = pygame.image.load(resource_path('Assets/Buttons/Resume Button1.png')).convert()
+single_mode_button_img = pygame.image.load(resource_path('Assets/Buttons/Single Mode.xcf')).convert_alpha()
+coop_mode_button_img = pygame.image.load(resource_path('Assets/Buttons/Coop Mode.xcf')).convert_alpha()
 dashboard_surface = pygame.Surface((WIDTH,70))
 dashboard_surface.fill((102, 64, 26))
-bean_surface = pygame.transform.scale_by(pygame.image.load('Assets/Sprites/Player_Sprite/Coffee_bean.xcf').convert_alpha(), 0.4)
+bean_surface = pygame.transform.scale_by(pygame.image.load(resource_path('Assets/Sprites/Player_Sprite/Coffee_bean.xcf')).convert_alpha(), 0.4)
 #SOUNDS
-collision_sound = pygame.mixer.Sound('Assets/Sound/collide_bean.mp3')
+collision_sound = pygame.mixer.Sound(resource_path('Assets/Sound/collide_bean.mp3'))
 collision_sound.set_volume(0.07)
-game_over_sound = pygame.mixer.Sound('Assets/Sound/player-lose.wav')
+game_over_sound = pygame.mixer.Sound(resource_path('Assets/Sound/player-lose.wav'))
 game_over_sound.set_volume(0.3)
-damage_sound = pygame.mixer.Sound('Assets/Sound/collide_sugar.wav')
+damage_sound = pygame.mixer.Sound(resource_path('Assets/Sound/collide_sugar.wav'))
 damage_sound.set_volume(0.25)
-char_sel_sound = pygame.mixer.Sound('Assets/Sound/blip_click.mp3')
+char_sel_sound = pygame.mixer.Sound(resource_path('Assets/Sound/blip_click.mp3'))
 char_sel_sound.set_volume(0.15)
-button_sound = pygame.mixer.Sound('Assets/Sound/button.mp3')
+button_sound = pygame.mixer.Sound(resource_path('Assets/Sound/button.mp3'))
 button_sound.set_volume(0.3)
-pygame.mixer.music.load('Assets/Sound/house_party_bkg_music.mp3')
+pygame.mixer.music.load(resource_path('Assets/Sound/house_party_bkg_music.mp3'))
 pygame.mixer.music.set_volume(0.3)
 
 Controls_surface = font.render("Use 'w,a,d' to move and press ESC in game to pause",False,GREY)
 controls_rect = Controls_surface.get_rect(midbottom = (640,600))
+
 Coop_Controls_surface = font.render(f"Player 1 uses 'w,a,d' and Player 2 uses arrow keys for movement",False,GREY)
 coop_controls_rect = Coop_Controls_surface.get_rect(midbottom = (640,600))
 Back_surface = font.render("Press ESC to return home",False,GREY)
@@ -352,7 +362,7 @@ def main_menu():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                exit()
+                sys.exit()
 
         pygame.display.update()
         clock.tick(60)
@@ -365,7 +375,14 @@ def singleCharSelect():
     right_arrow_visible=True
     left_arrow_visible=False
     while True:
+        character_name_surface = font.render(chars[char_index]['name'], False, BLACK)
+        power_up_surface = font.render("Power Up: " + chars[char_index]['powerup_name'], False, BLACK)
+        character_name_rect = character_name_surface.get_rect(midbottom=(640,250))
+        power_up_rect = power_up_surface.get_rect(midbottom=(640,280))
+        
         screen.blit(character_selection,(0,0))
+        screen.blit(character_name_surface, character_name_rect)
+        screen.blit(power_up_surface, power_up_rect)
         screen.blit(Controls_surface,controls_rect)
         screen.blit(Back_surface,back_rect)
         rect = chars[char_index]['display'].get_rect(midbottom=(640,450))
@@ -388,7 +405,7 @@ def singleCharSelect():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                exit()
+                sys.exit()
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 main_menu()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -421,10 +438,27 @@ def coopCharSelect():
         screen.blit(character_selection,(0,0))
         screen.blit(Coop_Controls_surface,coop_controls_rect)
         screen.blit(Back_surface,back_rect)
+        #p1 name and power ups
+        p1_character_name_surface = font.render(chars[p1_char_index]['name'], False, BLACK)
+        p1_power_up_surface = font.render("Power Up: " + chars[p1_char_index]['powerup_name'], False, BLACK)
+        p1_character_name_rect = p1_character_name_surface.get_rect(midbottom=(430,250))
+        p1_power_up_rect = p1_power_up_surface.get_rect(midbottom=(430,280))
+
+        #p2 name and powe ups
+        p2_character_name_surface = font.render(chars[p2_char_index]['name'], False, BLACK)
+        p2_power_up_surface = font.render("Power Up: " + chars[p2_char_index]['powerup_name'], False, BLACK)
+        p2_character_name_rect = p2_character_name_surface.get_rect(midbottom=(850,250))
+        p2_power_up_rect = p2_power_up_surface.get_rect(midbottom=(850,280))
+
+
         #display characters
         p1_rect = chars[p1_char_index]['display'].get_rect(midbottom=(430,450))
         screen.blit(chars[p1_char_index]['display'],p1_rect)
+        screen.blit(p1_character_name_surface, p1_character_name_rect)
+        screen.blit(p1_power_up_surface, p1_power_up_rect)
         p2_rect = chars[p2_char_index]['display'].get_rect(midbottom=(850,450))
+        screen.blit(p2_character_name_surface, p2_character_name_rect)
+        screen.blit(p2_power_up_surface, p2_power_up_rect)
         screen.blit(chars[p2_char_index]['display'],p2_rect)
         p1_right_arrow_button = Button(575,490,right_character_selection_button,1.2)
         p1_left_arrow_button = Button(285,490,left_character_selection_button,1.2)
@@ -467,7 +501,7 @@ def coopCharSelect():
         for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    exit()
+                    sys.exit()
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     main_menu()
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -495,7 +529,7 @@ def retry_menu(collision_count,player,obstacles,image,powerup_type):
         screen.blit(game_over_background,(0,0))
         if collision_count > high_score:
             high_score = collision_count
-            with open('high_score.txt','w') as file:
+            with open(high_score_path(), 'w') as file:
                 file.write(f"{collision_count}")
 
         displayHighScore((300,275), high_score)
@@ -518,7 +552,7 @@ def retry_menu(collision_count,player,obstacles,image,powerup_type):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                exit()
+                sys.exit()
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 main_menu()
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
@@ -555,7 +589,7 @@ def coop_retry_menu(p1_score,p2_score,players,p1_obstacles,p2_obstacles,p1_image
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                exit()
+                sys.exit()
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 main_menu()
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
@@ -606,7 +640,7 @@ def singleMode(image,powerup_type):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                exit()
+                sys.exit()
             if game_active:
                 if not game_paused:
                     if event.type == pygame.KEYDOWN:
@@ -845,7 +879,7 @@ def coopMode(p1_image,p2_image,p1_power_up_type,p2_power_up_type):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                exit()
+                sys.exit()
             if game_active:
                 # if event.type == pygame.KEYDOWN:
                 #     if event.key == pygame.K_ESCAPE:
